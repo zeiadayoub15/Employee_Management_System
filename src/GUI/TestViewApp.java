@@ -1,18 +1,28 @@
 package GUI;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 public class TestViewApp
 {
-    public static void main(String[] args) { // نقطة بداية تشغيل البرنامج
-        SwingUtilities.invokeLater(() -> { // تشغيل الواجهة على Event Dispatch Thread الخاص بـ Swing
-            JFrame frame = new JFrame("Test - View Employees"); // إنشاء نافذة رئيسية بعنوان تجريبي
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); // إغلاق البرنامج بالكامل عند إغلاق النافذة
-            frame.setSize(850, 450); // تحديد أبعاد النافذة (العرض 850، الارتفاع 450)
-            frame.setLocationRelativeTo(null); // توسيط النافذة في منتصف الشاشة
-            frame.add(new ViewEmployeesPanel()); // إضافة ViewEmployeesPanel داخل النافذة
-            frame.setVisible(true); // إظهار النافذة للمستخدم
-        }); // نهاية بلوك SwingUtilities.invokeLater
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ignored) {
+            }
+
+            JFrame frame = new JFrame("Employee Management System - Update & View Test");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(980, 540);
+            frame.setLocationRelativeTo(null);
+
+            ViewEmployeesPanel viewPanel = new ViewEmployeesPanel();
+            frame.add(viewPanel);
+
+            frame.setVisible(true);
+        });
     }
 }
 
