@@ -1,5 +1,6 @@
 package GUI;
 
+import Entities.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -10,29 +11,6 @@ import java.util.List;
 
 public class ViewEmployeesPanel extends JPanel
 {
-    // temp until linking with backend
-    private static class TestEmployeeRecord
-    {
-        int id;
-        String fullName;
-        int age;
-        String department;
-        String position;
-        String type;
-        double calculatedSalary;
-
-        TestEmployeeRecord(int id, String fullName, int age, String department,
-                           String position, String type, double calculatedSalary) {
-            this.id = id;
-            this.fullName = fullName;
-            this.age = age;
-            this.department = department;
-            this.position = position;
-            this.type = type;
-            this.calculatedSalary = calculatedSalary;
-        }
-    }
-    private final List<TestEmployeeRecord> testEmployees = new ArrayList<>();
     private JTextField searchField;
     private JComboBox<String> departmentFilterCombo;
     private JButton searchButton;
@@ -52,16 +30,48 @@ public class ViewEmployeesPanel extends JPanel
         initCenterTable();
         initBottomPanel();
         initListeners();
-        loadTestData();
+        refreshData(); // [MODIFIED] تحميل البيانات والاقسام من SharedData
+    }
+
+    private String[] getDepartmentNames(boolean includeAllOption)
+    {
+        List<String> names = new ArrayList<>();
+        if (includeAllOption) {
+            names.add("All Departments");
+        }
+        for (Department dept : SharedData.getDepartments()) {
+            if (dept != null && Helpers.isValidString(dept.getName())) {
+                names.add(dept.getName());
+            }
+        }
+        return names.toArray(new String[0]);
+    }
+
+    private void reloadDepartmentsCombo()
+    {
+        String previousSelection = (String) departmentFilterCombo.getSelectedItem();
+        departmentFilterCombo.removeAllItems();
+        for (String name : getDepartmentNames(true)) {
+            departmentFilterCombo.addItem(name);
+        }
+        if (previousSelection != null) {
+            departmentFilterCombo.setSelectedItem(previousSelection);
+        }
+        if (departmentFilterCombo.getSelectedItem() == null && departmentFilterCombo.getItemCount() > 0) {
+            departmentFilterCombo.setSelectedIndex(0);
+        }
+    }
+
+    public void refreshData() {
+        reloadDepartmentsCombo();
+        renderEmployeesTable(SharedData.getEmployees());
     }
 
     private void initTopPanel()
     {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         searchField = new JTextField(18);
-        departmentFilterCombo = new JComboBox<>(new String[]{
-                "All Departments", "IT", "Human Resources", "Finance", "Marketing", "Sales"
-        });
+        departmentFilterCombo = new JComboBox<>(getDepartmentNames(true));
         searchButton = new JButton("Search");
         resetButton = new JButton("Reset");
 
@@ -115,55 +125,6 @@ public class ViewEmployeesPanel extends JPanel
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    // testing data
-   /* public void loadTestData() { // دالة مؤقتة لإضافة صفوف تجريبية للجدول قبل ربط الـ Backend
-        tableModel.setRowCount(0); // تفريغ أي صفوف قديمة في الجدول قبل إضافة البيانات الجديدة
-
-        double fullTimeSalary1 = 15000 + 2000; // حساب مرتب Full-Time: الأساسي (15000) + البونص (2000)[cite: 3]
-        tableModel.addRow(new Object[]{ // إضافة صف الموظف الأول إلى الجدول
-                101, // ID
-                "Ahmed Hassan", // Full Name
-                28, // Age
-                "IT", // Department
-                "Software Engineer", // Position
-                "Full-Time", // Type
-                fullTimeSalary1 // Calculated Salary
-        });
-
-        double partTimeSalary1 = 100 * 80; // حساب مرتب Part-Time: سعر الساعة (100) * عدد الساعات (80)[cite: 4]
-        tableModel.addRow(new Object[]{ // إضافة صف الموظف الثاني إلى الجدول
-                102, // ID
-                "Mona Adel", // Full Name
-                24, // Age
-                "Marketing", // Department
-                "Content Specialist", // Position
-                "Part-Time", // Type
-                partTimeSalary1 // Calculated Salary
-        });
-
-        double fullTimeSalary2 = 18000 + 1500; // حساب مرتب Full-Time آخر: (18000 + 1500)[cite: 3]
-        tableModel.addRow(new Object[]{ // إضافة صف الموظف الثالث إلى الجدول
-                103, // ID
-                "Karim Samir", // Full Name
-                32, // Age
-                "Finance", // Department
-                "Accountant", // Position
-                "Full-Time", // Type
-                fullTimeSalary2 // Calculated Salary
-        });
-
-        double partTimeSalary2 = 120 * 60; // حساب مرتب Part-Time آخر: (120 * 60)[cite: 4]
-        tableModel.addRow(new Object[]{ // إضافة صف الموظف الرابع إلى الجدول
-                104, // ID
-                "Nourhan Tarek", // Full Name
-                26, // Age
-                "HR", // Department
-                "Recruiter", // Position
-                "Part-Time", // Type
-                partTimeSalary2 // Calculated Salary
-        });
-    }
-*/
     private void initListeners()
     {
         updateButton.addActionListener(new ActionListener()
@@ -177,11 +138,11 @@ public class ViewEmployeesPanel extends JPanel
 
         deleteButton.addActionListener(new ActionListener()
         {
-         @Override
-         public void actionPerformed(ActionEvent e)
-         {
-             handleDeleteEmployee();
-         }
+            @Override
+            public void actionPerformed(ActionEvent e)
+            {
+                handleDeleteEmployee();
+            }
         });
 
         searchButton.addActionListener(new ActionListener()
@@ -198,7 +159,9 @@ public class ViewEmployeesPanel extends JPanel
             @Override
             public void actionPerformed(ActionEvent e)
             {
-                handleFilterByDepartment();
+                if (departmentFilterCombo.getSelectedItem() != null) {
+                    handleFilterByDepartment();
+                } // [ADDED]
             }
         });
 
@@ -206,8 +169,10 @@ public class ViewEmployeesPanel extends JPanel
             @Override
             public void actionPerformed(ActionEvent e) {
                 searchField.setText("");
-                departmentFilterCombo.setSelectedIndex(0);
-                renderEmployeesTable(testEmployees);
+                if (departmentFilterCombo.getItemCount() > 0) {
+                    departmentFilterCombo.setSelectedIndex(0);
+                } // [ADDED]
+                renderEmployeesTable(SharedData.getEmployees());
             }
         });
     }
@@ -226,9 +191,9 @@ public class ViewEmployeesPanel extends JPanel
         }
 
         int empId = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
-        TestEmployeeRecord target = findEmployeeById(empId);
+        int targetIndex = findEmployeeIndexById(empId);
 
-        if (target == null) {
+        if (targetIndex == -1) {
             JOptionPane.showMessageDialog(
                     this,
                     "Selected employee record was not found.",
@@ -238,25 +203,58 @@ public class ViewEmployeesPanel extends JPanel
             return;
         }
 
+        Employee currentEmp = SharedData.getEmployees().get(targetIndex);
+
         Window owner = SwingUtilities.getWindowAncestor(this);
-        JDialog dialog = new JDialog(owner, "Update Employee (ID: " + target.id + ")", Dialog.ModalityType.APPLICATION_MODAL);
+        JDialog dialog = new JDialog(owner, "Update Employee (ID: " + currentEmp.getId() + ")", Dialog.ModalityType.APPLICATION_MODAL);
         dialog.setLayout(new BorderLayout(10, 10));
-        dialog.setSize(400, 270);
+        dialog.setSize(420, 320);
         dialog.setLocationRelativeTo(this);
 
-        JPanel formPanel = new JPanel(new GridLayout(5, 2, 8, 8));
+        JPanel formPanel = new JPanel(new GridLayout(7, 2, 8, 8));
         formPanel.setBorder(BorderFactory.createEmptyBorder(12, 12, 6, 12));
 
-        JTextField nameField = new JTextField(target.fullName);
-        JTextField ageField = new JTextField(String.valueOf(target.age));
-        JComboBox<String> deptCombo = new JComboBox<>(new String[]{
-                "IT", "Human Resources", "Finance", "Marketing", "Sales"
-        });
-        deptCombo.setSelectedItem(target.department);
+        JTextField nameField = new JTextField(currentEmp.getName());
+        JTextField ageField = new JTextField(String.valueOf(currentEmp.getAge()));
+        JComboBox<String> deptCombo = new JComboBox<>(getDepartmentNames(false));
+        deptCombo.setSelectedItem(currentEmp.getDepartment());
 
-        JTextField positionField = new JTextField(target.position);
+        JTextField positionField = new JTextField(currentEmp.getPosition());
         JComboBox<String> typeCombo = new JComboBox<>(new String[]{"Full-Time", "Part-Time"});
-        typeCombo.setSelectedItem(target.type);
+        typeCombo.setSelectedItem(currentEmp.getType());
+
+        JLabel payField1Label = new JLabel();
+        JTextField payField1 = new JTextField();
+        JLabel payField2Label = new JLabel();
+        JTextField payField2 = new JTextField();
+
+        Runnable syncPayFields = () -> {
+            String selectedType = (String) typeCombo.getSelectedItem();
+            if ("Full-Time".equals(selectedType)) {
+                payField1Label.setText("Basic Salary:");
+                payField2Label.setText("Bonus:");
+                if (currentEmp instanceof FullTimeEmployee ft) {
+                    payField1.setText(String.valueOf(ft.getBasicSalary()));
+                    payField2.setText(String.valueOf(ft.getBonus()));
+                } else {
+                    payField1.setText("15000.0");
+                    payField2.setText("2000.0");
+                }
+            } else {
+                payField1Label.setText("Hourly Rate:");
+                payField2Label.setText("Hours Worked:");
+                if (currentEmp instanceof PartTimeEmployee pt) {
+                    payField1.setText(String.valueOf(pt.getHourlyRate()));
+                    payField2.setText(String.valueOf(pt.getHoursWorked()));
+                } else {
+                    payField1.setText("100.0");
+                    payField2.setText("80.0");
+                }
+            }
+        };
+
+        syncPayFields.run();
+        typeCombo.addActionListener(e -> syncPayFields.run());
 
         formPanel.add(new JLabel("Full Name:"));
         formPanel.add(nameField);
@@ -268,6 +266,10 @@ public class ViewEmployeesPanel extends JPanel
         formPanel.add(positionField);
         formPanel.add(new JLabel("Type:"));
         formPanel.add(typeCombo);
+        formPanel.add(payField1Label);
+        formPanel.add(payField1);
+        formPanel.add(payField2Label);
+        formPanel.add(payField2);
 
         JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 8));
         JButton saveBtn = new JButton("Save");
@@ -284,15 +286,15 @@ public class ViewEmployeesPanel extends JPanel
             String newPosition = positionField.getText().trim();
             String newType = (String) typeCombo.getSelectedItem();
 
-            if (newName.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Full Name is required.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            if (!Helpers.isValidString(newName) || !newName.matches("[a-zA-Z\\s]+")) {
+                JOptionPane.showMessageDialog(dialog, "Full Name must contain letters only.", "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
             int newAge;
             try {
                 newAge = Integer.parseInt(rawAge);
-                if (newAge < 18 || newAge > 70) {
+                if (!Helpers.isPositiveInt(newAge) || newAge < 18 || newAge > 70) {
                     JOptionPane.showMessageDialog(dialog, "Age must be between 18 and 70.", "Validation Error", JOptionPane.WARNING_MESSAGE);
                     return;
                 }
@@ -301,18 +303,33 @@ public class ViewEmployeesPanel extends JPanel
                 return;
             }
 
-            if (newPosition.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Position is required.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            if (!Helpers.isValidString(newPosition) || !newPosition.matches("[a-zA-Z\\s-]+")) {
+                JOptionPane.showMessageDialog(dialog, "Position must contain letters only.", "Validation Error", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            target.fullName = newName;
-            target.age = newAge;
-            target.department = newDept;
-            target.position = newPosition;
-            target.type = newType;
-            target.calculatedSalary = "Full-Time".equalsIgnoreCase(newType) ? (15000 + 2000) : (100 * 80);
+            double val1;
+            double val2;
+            try {
+                val1 = Double.parseDouble(payField1.getText().trim());
+                val2 = Double.parseDouble(payField2.getText().trim());
+                if (!Helpers.isNonNegativeDouble(val1) || !Helpers.isNonNegativeDouble(val2)) {
+                    JOptionPane.showMessageDialog(dialog, "Salary values must be non-negative numbers.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(dialog, "Please enter valid numeric salary values.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
+            Employee updatedEmployee;
+            if ("Full-Time".equals(newType)) {
+                updatedEmployee = new FullTimeEmployee(currentEmp.getId(), newName, newAge, newDept, newPosition, val1, val2);
+            } else {
+                updatedEmployee = new PartTimeEmployee(currentEmp.getId(), newName, newAge, newDept, newPosition, val1, val2);
+            }
+
+            SharedData.getEmployees().set(targetIndex, updatedEmployee);
             handleFilterByDepartment();
             dialog.dispose();
 
@@ -329,16 +346,17 @@ public class ViewEmployeesPanel extends JPanel
         dialog.setVisible(true);
     }
 
-    private TestEmployeeRecord findEmployeeById(int id)
+    private int findEmployeeIndexById(int id)
     {
-        for (TestEmployeeRecord emp : testEmployees) {
-            if (emp.id == id) {
-                return emp;
+        List<Employee> list = SharedData.getEmployees();
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i).getId() == id) {
+                return i;
             }
         }
-        return null;
+        return -1;
     }
-    // temp until linking with backend
+
     private void handleDeleteEmployee()
     {
         int selectedRow = employeesTable.getSelectedRow();
@@ -353,7 +371,7 @@ public class ViewEmployeesPanel extends JPanel
             return;
         }
 
-        Object empId = tableModel.getValueAt(selectedRow, 0);
+        int empId = Integer.parseInt(tableModel.getValueAt(selectedRow, 0).toString());
         Object empName = tableModel.getValueAt(selectedRow, 1);
 
         int confirm = JOptionPane.showConfirmDialog(
@@ -365,6 +383,7 @@ public class ViewEmployeesPanel extends JPanel
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
+            SharedData.getEmployees().removeIf(emp -> emp.getId() == empId);
             tableModel.removeRow(selectedRow);
             JOptionPane.showMessageDialog(
                     this,
@@ -392,6 +411,15 @@ public class ViewEmployeesPanel extends JPanel
         int targetId;
         try {
             targetId = Integer.parseInt(rawId);
+            if (!Helpers.isPositiveInt(targetId)) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Employee ID must be a positive integer.",
+                        "Invalid ID",
+                        JOptionPane.ERROR_MESSAGE
+                );
+                return;
+            }
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(
                     this,
@@ -402,9 +430,9 @@ public class ViewEmployeesPanel extends JPanel
             return;
         }
 
-        List<TestEmployeeRecord> matches = new ArrayList<>();
-        for (TestEmployeeRecord emp : testEmployees) {
-            if (emp.id == targetId) {
+        List<Employee> matches = new ArrayList<>();
+        for (Employee emp : SharedData.getEmployees()) {
+            if (emp.getId() == targetId) {
                 matches.add(emp);
             }
         }
@@ -421,18 +449,18 @@ public class ViewEmployeesPanel extends JPanel
         renderEmployeesTable(matches);
     }
 
-    private void renderEmployeesTable(List<TestEmployeeRecord> employeesToShow)
+    private void renderEmployeesTable(List<Employee> employeesToShow)
     {
         tableModel.setRowCount(0);
-        for (TestEmployeeRecord emp : employeesToShow) {
+        for (Employee emp : employeesToShow) {
             tableModel.addRow(new Object[]{
-                    emp.id,
-                    emp.fullName,
-                    emp.age,
-                    emp.department,
-                    emp.position,
-                    emp.type,
-                    emp.calculatedSalary
+                    emp.getId(),
+                    emp.getName(),
+                    emp.getAge(),
+                    emp.getDepartment(),
+                    emp.getPosition(),
+                    emp.getType(),
+                    emp.calculateSalary()
             });
         }
     }
@@ -441,13 +469,13 @@ public class ViewEmployeesPanel extends JPanel
     {
         String selectedDept = (String) departmentFilterCombo.getSelectedItem();
         if (selectedDept == null || selectedDept.equalsIgnoreCase("All Departments")) {
-            renderEmployeesTable(testEmployees);
+            renderEmployeesTable(SharedData.getEmployees());
             return;
         }
 
-        List<TestEmployeeRecord> matches = new ArrayList<>();
-        for (TestEmployeeRecord emp : testEmployees) {
-            if (emp.department != null && emp.department.equalsIgnoreCase(selectedDept)) {
+        List<Employee> matches = new ArrayList<>();
+        for (Employee emp : SharedData.getEmployees()) {
+            if (emp.getDepartment() != null && emp.getDepartment().equalsIgnoreCase(selectedDept)) {
                 matches.add(emp);
             }
         }
@@ -464,25 +492,4 @@ public class ViewEmployeesPanel extends JPanel
         }
         renderEmployeesTable(matches);
     }
-
-    public void loadTestData()
-    {
-        testEmployees.clear();
-
-        testEmployees.add(new TestEmployeeRecord(
-                101, "Ahmed Hassan", 28, "IT", "Software Engineer", "Full-Time", 15000 + 2000
-        ));
-        testEmployees.add(new TestEmployeeRecord(
-                102, "Mona Adel", 24, "Marketing", "Content Specialist", "Part-Time", 100 * 80
-        ));
-        testEmployees.add(new TestEmployeeRecord(
-                103, "Karim Samir", 32, "Finance", "Accountant", "Full-Time", 18000 + 1500
-        ));
-        testEmployees.add(new TestEmployeeRecord(
-                104, "Nourhan Tarek", 26, "Human Resources", "Recruiter", "Part-Time", 120 * 60
-        ));
-
-        renderEmployeesTable(testEmployees);
-    }
 }
-

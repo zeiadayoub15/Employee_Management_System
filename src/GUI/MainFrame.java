@@ -11,8 +11,12 @@ public class MainFrame extends JFrame {
     public static final String VIEW = "VIEW";
     public static final String DEPT = "DEPT";
 
-    private CardLayout cardLayout = new CardLayout();
-    private JPanel contentPanel = new JPanel(cardLayout);
+    private final CardLayout cardLayout = new CardLayout();
+    private final JPanel contentPanel = new JPanel(cardLayout);
+
+    private final AddPannel addPanel;
+    private final ViewEmployeesPanel viewEmployeesPanel;
+    private final DepartmentPanel departmentPanel;
 
     public MainFrame() {
         setTitle("Employee Management System");
@@ -25,10 +29,17 @@ public class MainFrame extends JFrame {
         add(buildMenu(), BorderLayout.WEST);
 
         // ---- CENTER: all screens stacked, one visible at a time ----
+        viewEmployeesPanel = new ViewEmployeesPanel();
+        addPanel = new AddPannel(() -> viewEmployeesPanel.refreshData());
+        departmentPanel = new DepartmentPanel(() -> {
+            addPanel.refreshDepartments();
+            viewEmployeesPanel.refreshData();
+        });
+
         contentPanel.add(buildHomePanel(), HOME);
-        contentPanel.add(new AddPannel(), ADD);
-        contentPanel.add(new ViewEmployeesPanel(), VIEW);
-        contentPanel.add(new DepartmentPanel(), DEPT);
+        contentPanel.add(addPanel, ADD);
+        contentPanel.add(viewEmployeesPanel, VIEW);
+        contentPanel.add(departmentPanel, DEPT);
         add(contentPanel, BorderLayout.CENTER);
 
         showCard(HOME);
@@ -76,6 +87,11 @@ public class MainFrame extends JFrame {
     }
 
     public void showCard(String name) {
+        if (VIEW.equals(name)) {
+            viewEmployeesPanel.refreshData();
+        } else if (ADD.equals(name)) {
+            addPanel.refreshDepartments();
+        }
         cardLayout.show(contentPanel, name);
     }
 

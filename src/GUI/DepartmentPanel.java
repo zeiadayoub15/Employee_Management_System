@@ -1,13 +1,12 @@
 package GUI;
 
+import Entities.*;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -26,12 +25,24 @@ public class DepartmentPanel extends JPanel implements ActionListener {
     private JButton addButton ;
     private final String[] depStringsBasics = {"IT", "Human Resources", "Finance", "Marketing", "Sales"};
     private ArrayList<String> depStrings = new ArrayList<>(Arrays.asList(depStringsBasics));
+    private Runnable onDepartmentAdded ;
 
     public ArrayList<String> getDepartments() {
+        depStrings.clear();
+        for (Department d : SharedData.getDepartments()) {
+            depStrings.add(d.getName());
+        }
         return depStrings;
     }
 
-    public DepartmentPanel(){
+    public DepartmentPanel()
+    {
+        this(null);
+    }
+
+    public DepartmentPanel(Runnable onDepartmentAdded){
+        this.onDepartmentAdded = onDepartmentAdded ;
+
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
@@ -79,12 +90,28 @@ public class DepartmentPanel extends JPanel implements ActionListener {
             }
             try {
                 int ID = Integer.parseInt(id_Field.getText().trim());
-                
-                    // ERROR : WE NEED TO MODIFY DEPARTMENT WHEN ADDED
 
-                            // successfull addition  (Backend here !!)
-                    JOptionPane.showMessageDialog(this, "Department added successfully!");
-                
+                String deptName = nameDep_Field.getText().trim();
+
+                if (!Helpers.isPositiveInt(ID)) {
+                    JOptionPane.showMessageDialog(this, "ID must be positive!", "Addition Failed", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (SharedData.findDepartmentById(ID) != null || SharedData.findDepartmentByName(deptName) != null) {
+                    JOptionPane.showMessageDialog(this, "Department ID or Name already exists!", "Addition Failed", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                Department newDept = new Department(ID, deptName);
+                SharedData.addDepartment(newDept);
+                if (onDepartmentAdded != null) {
+                    onDepartmentAdded.run();
+                }
+
+                JOptionPane.showMessageDialog(this, "Department added successfully!");
+                id_Field.setText("");
+                nameDep_Field.setText("");
+
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "ID field must be numbers!", "Addition Failed", JOptionPane.ERROR_MESSAGE);
             }

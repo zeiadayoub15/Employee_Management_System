@@ -1,12 +1,12 @@
 package GUI;
 
+import Entities.*;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -34,10 +34,16 @@ public class AddPannel extends JPanel implements ActionListener {
     private JLabel l2 ;
     private JTextField field1 ;
     private JTextField field2 ;
+    private Runnable onEmployeeAdded ;
     
     JPanel formPanel ;
     public AddPannel(){
-        
+        this(null);
+    }
+
+    public AddPannel(Runnable onEmployeeAdded){
+        this.onEmployeeAdded = onEmployeeAdded;
+
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
 
@@ -60,6 +66,7 @@ public class AddPannel extends JPanel implements ActionListener {
 
         formPanel.add(new JLabel("Department"));
         departmentComboBox = new JComboBox<>(depStrings.toArray());
+        refreshDepartments();
         formPanel.add(departmentComboBox);
 
         formPanel.add(new JLabel("Position"));
@@ -92,6 +99,21 @@ public class AddPannel extends JPanel implements ActionListener {
 
 
     }
+
+    public void refreshDepartments()
+    {
+        Object selected = departmentComboBox.getSelectedItem();
+        depStrings.clear();
+        departmentComboBox.removeAllItems();
+        for (Department d : SharedData.getDepartments()) {
+            depStrings.add(d.getName());
+            departmentComboBox.addItem(d.getName());
+        }
+        if (selected != null) {
+            departmentComboBox.setSelectedItem(selected);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource()==TypeComboBox){
@@ -132,8 +154,19 @@ public class AddPannel extends JPanel implements ActionListener {
 
                 if (age <= 0 || F1 < 0 || F2 < 0) {
                     JOptionPane.showMessageDialog(this, "invalid numeric values", "Addition Failed", JOptionPane.ERROR_MESSAGE);
-                } else {          // successfull addition  (Backend here !!)
-                    System.out.println("Welcome " + name);
+                } else {
+                    int newId = SharedData.generateNextEmployeeId();
+                    Employee newEmp;
+                    if (Type.equals("Full time")) {
+                        newEmp = new FullTimeEmployee(newId, name, age, department, position, F1, F2);
+                    } else {
+                        newEmp = new PartTimeEmployee(newId, name, age, department, position, F1, F2);
+                    }
+                    SharedData.addEmployee(newEmp);
+                    if (onEmployeeAdded != null) {
+                        onEmployeeAdded.run();
+                    }
+
                     JOptionPane.showMessageDialog(this, "Employee added successfully!");
                     name_field.setText("");
                     age_field.setText("");
@@ -146,8 +179,4 @@ public class AddPannel extends JPanel implements ActionListener {
             }
         }
     }
-
-    
-
-
 }
