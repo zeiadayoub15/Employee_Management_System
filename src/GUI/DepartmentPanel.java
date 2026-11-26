@@ -2,6 +2,7 @@ package GUI;
 
 import Entities.*;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -19,13 +20,13 @@ import javax.swing.JTextField;
 
 public class DepartmentPanel extends JPanel implements ActionListener {
 
-    private JPanel formPanel ;
-    private JTextField id_Field ;
-    private JTextField nameDep_Field ;
-    private JButton addButton ;
+    private final JPanel formPanel ;
+    private final JTextField id_Field ;
+    private final JTextField nameDep_Field ;
+    private final JButton addButton ;
     private final String[] depStringsBasics = {"IT", "Human Resources", "Finance", "Marketing", "Sales"};
-    private ArrayList<String> depStrings = new ArrayList<>(Arrays.asList(depStringsBasics));
-    private Runnable onDepartmentAdded ;
+    private final ArrayList<String> depStrings = new ArrayList<>(Arrays.asList(depStringsBasics));
+    private final Runnable onDepartmentAdded ;
 
     public ArrayList<String> getDepartments() {
         depStrings.clear();
@@ -45,33 +46,45 @@ public class DepartmentPanel extends JPanel implements ActionListener {
 
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        setBackground(AppTheme.BG_MAIN);
 
         JLabel title = new JLabel("Add New Department", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 24));
+        title.setForeground(AppTheme.TEXT_DARK);
         add(title, BorderLayout.NORTH);
 
         formPanel = new JPanel(new GridLayout(2, 2, 10, 12));
         formPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        AppTheme.stylePanel(formPanel);
 
         Font fieldFont = new Font("Arial", Font.BOLD, 15);
 
-        formPanel.add(new JLabel("ID"));
+        JLabel idLabel = new JLabel("ID");
+        AppTheme.styleLabel(idLabel);
+        formPanel.add(idLabel);
         id_Field = new JTextField(18) ;
+        AppTheme.styleTextField(id_Field);
         id_Field.setFont(fieldFont);
         formPanel.add(id_Field);
 
-        formPanel.add(new JLabel("Department name"));
+        JLabel nameDepLabel = new JLabel("Department name");
+        AppTheme.styleLabel(nameDepLabel);
+        formPanel.add(nameDepLabel);
         nameDep_Field = new JTextField(18) ;
+        AppTheme.styleTextField(nameDep_Field);
         nameDep_Field.setFont(fieldFont);
         formPanel.add(nameDep_Field);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        AppTheme.stylePanel(buttonPanel);
         addButton = new JButton("Add");
+        AppTheme.styleButton(addButton, new Color(40, 167, 69), AppTheme.TEXT_LIGHT);
         buttonPanel.add(addButton);
         add(buttonPanel, BorderLayout.SOUTH);
         addButton.addActionListener(this);
 
         JPanel centerWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        AppTheme.stylePanel(centerWrapper);
         centerWrapper.add(formPanel);
         add(centerWrapper, BorderLayout.CENTER);
 
@@ -115,11 +128,8 @@ public class DepartmentPanel extends JPanel implements ActionListener {
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "ID field must be numbers!", "Addition Failed", JOptionPane.ERROR_MESSAGE);
             }
-            
+
 
         }
     }
-
-
-    
 }

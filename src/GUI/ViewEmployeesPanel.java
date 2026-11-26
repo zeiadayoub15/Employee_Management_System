@@ -26,11 +26,12 @@ public class ViewEmployeesPanel extends JPanel
     {
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+        setBackground(AppTheme.BG_MAIN);
         initTopPanel();
         initCenterTable();
         initBottomPanel();
         initListeners();
-        refreshData(); // [MODIFIED] تحميل البيانات والاقسام من SharedData
+        refreshData();
     }
 
     private String[] getDepartmentNames(boolean includeAllOption)
@@ -70,16 +71,25 @@ public class ViewEmployeesPanel extends JPanel
     private void initTopPanel()
     {
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        AppTheme.stylePanel(topPanel);
         searchField = new JTextField(18);
+        AppTheme.styleTextField(searchField);
         departmentFilterCombo = new JComboBox<>(getDepartmentNames(true));
+        AppTheme.styleComboBox(departmentFilterCombo);
         searchButton = new JButton("Search");
+        AppTheme.styleButton(searchButton, AppTheme.BTN_SEARCH, AppTheme.TEXT_LIGHT);
         resetButton = new JButton("Reset");
+        AppTheme.styleButton(resetButton, AppTheme.BTN_RESET, AppTheme.TEXT_DARK);
 
-        topPanel.add(new JLabel("Search (ID):"));
+        JLabel searchLabel = new JLabel("Search (ID / Name):");
+        AppTheme.styleLabel(searchLabel);
+        topPanel.add(searchLabel);
         topPanel.add(searchField);
         topPanel.add(searchButton);
 
-        topPanel.add(new JLabel("Department:"));
+        JLabel deptLabel = new JLabel("Department:");
+        AppTheme.styleLabel(deptLabel);
+        topPanel.add(deptLabel);
         topPanel.add(departmentFilterCombo);
         topPanel.add(resetButton);
         add(topPanel, BorderLayout.NORTH);
@@ -109,15 +119,19 @@ public class ViewEmployeesPanel extends JPanel
         employeesTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         employeesTable.getTableHeader().setReorderingAllowed(false);
         JScrollPane scrollPane = new JScrollPane(employeesTable);
+        AppTheme.styleTable(employeesTable, scrollPane);
         add(scrollPane, BorderLayout.CENTER);
     }
 
     private void initBottomPanel()
     {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
+        AppTheme.stylePanel(bottomPanel);
 
         updateButton = new JButton("Update");
+        AppTheme.styleButton(updateButton, AppTheme.BTN_UPDATE, AppTheme.TEXT_LIGHT);
         deleteButton = new JButton("Delete");
+        AppTheme.styleButton(deleteButton, AppTheme.BTN_DELETE, AppTheme.TEXT_LIGHT);
 
         bottomPanel.add(updateButton);
         bottomPanel.add(deleteButton);
@@ -161,7 +175,7 @@ public class ViewEmployeesPanel extends JPanel
             {
                 if (departmentFilterCombo.getSelectedItem() != null) {
                     handleFilterByDepartment();
-                } // [ADDED]
+                }
             }
         });
 
@@ -171,7 +185,7 @@ public class ViewEmployeesPanel extends JPanel
                 searchField.setText("");
                 if (departmentFilterCombo.getItemCount() > 0) {
                     departmentFilterCombo.setSelectedIndex(0);
-                } // [ADDED]
+                }
                 renderEmployeesTable(SharedData.getEmployees());
             }
         });
@@ -401,51 +415,72 @@ public class ViewEmployeesPanel extends JPanel
         if (rawId.isEmpty()) {
             JOptionPane.showMessageDialog(
                     this,
-                    "Please enter an Employee ID to search.",
+                    "Please enter an Employee ID or Name to search.",
                     "Empty Search Field",
                     JOptionPane.WARNING_MESSAGE
             );
             return;
         }
 
-        int targetId;
-        try {
-            targetId = Integer.parseInt(rawId);
-            if (!Helpers.isPositiveInt(targetId)) {
+        List<Employee> matches = new ArrayList<>();
+
+        if (rawId.matches("\\d+")) {
+            int targetId;
+            try {
+                targetId = Integer.parseInt(rawId);
+                if (!Helpers.isPositiveInt(targetId)) {
+                    JOptionPane.showMessageDialog(
+                            this,
+                            "Employee ID must be a positive integer.",
+                            "Invalid ID",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+            } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "Employee ID must be a positive integer.",
+                        "Employee ID must be a valid integer.",
                         "Invalid ID",
                         JOptionPane.ERROR_MESSAGE
                 );
                 return;
             }
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Employee ID must be a valid integer.",
-                    "Invalid ID",
-                    JOptionPane.ERROR_MESSAGE
-            );
-            return;
-        }
 
-        List<Employee> matches = new ArrayList<>();
-        for (Employee emp : SharedData.getEmployees()) {
-            if (emp.getId() == targetId) {
-                matches.add(emp);
+            for (Employee emp : SharedData.getEmployees()) {
+                if (emp.getId() == targetId) {
+                    matches.add(emp);
+                }
+            }
+
+            if (matches.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No employee found with ID: " + targetId,
+                        "No Match",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                return;
+            }
+        } else {
+            String lowerName = rawId.toLowerCase();
+            for (Employee emp : SharedData.getEmployees()) {
+                if (emp.getName() != null && emp.getName().toLowerCase().contains(lowerName)) {
+                    matches.add(emp);
+                }
+            }
+
+            if (matches.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "No employee found with name: " + rawId,
+                        "No Match",
+                        JOptionPane.INFORMATION_MESSAGE
+                );
+                return;
             }
         }
 
-        if (matches.isEmpty()) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "No employee found with ID: " + targetId,
-                    "No Match",
-                    JOptionPane.INFORMATION_MESSAGE
-            );
-            return;
-        }
         renderEmployeesTable(matches);
     }
 

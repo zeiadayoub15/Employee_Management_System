@@ -2,6 +2,7 @@ package GUI;
 
 import Entities.*;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -25,17 +26,17 @@ public class AddPannel extends JPanel implements ActionListener {
     private JComboBox departmentComboBox ;
     private final String depStringsBasics[] = {"IT" , "Human Resources" , "Finance" , "Marketing" , "Sales"} ;
     public ArrayList<String> depStrings = new ArrayList<>(Arrays.asList(depStringsBasics));
-    
+
     private JTextField position_Field ;
     private JComboBox TypeComboBox ;
-    private final String typeStrings[] = {"Full time","Part time"} ; 
+    private final String typeStrings[] = {"Full time","Part time"} ;
     private JButton addButton ;
     private JLabel l1 ;
     private JLabel l2 ;
     private JTextField field1 ;
     private JTextField field2 ;
     private Runnable onEmployeeAdded ;
-    
+
     JPanel formPanel ;
     public AddPannel(){
         this(null);
@@ -46,58 +47,82 @@ public class AddPannel extends JPanel implements ActionListener {
 
         setLayout(new BorderLayout(10, 10));
         setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 40));
+        setBackground(AppTheme.BG_MAIN);
 
         JLabel title = new JLabel("Add New Employee", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 24));
+        title.setForeground(AppTheme.TEXT_DARK);
         add(title, BorderLayout.NORTH);
 
         formPanel = new JPanel(new GridLayout(8, 2, 10, 12));
         formPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        AppTheme.stylePanel(formPanel);
 
-        formPanel.add(new JLabel("Full name"));
+        JLabel nameLabel = new JLabel("Full name");
+        AppTheme.styleLabel(nameLabel);
+        formPanel.add(nameLabel);
         name_field = new JTextField() ;
+        AppTheme.styleTextField(name_field);
         name_field.setFont(new Font("Arial" , Font.BOLD , 15));
         formPanel.add(name_field);
 
-        formPanel.add(new JLabel("Age"));
+        JLabel ageLabel = new JLabel("Age");
+        AppTheme.styleLabel(ageLabel);
+        formPanel.add(ageLabel);
         age_field  = new JTextField() ;
+        AppTheme.styleTextField(age_field);
         age_field.setFont(new Font("Arial" , Font.BOLD , 15));
         formPanel.add(age_field);
 
-        formPanel.add(new JLabel("Department"));
+        JLabel deptLabel = new JLabel("Department");
+        AppTheme.styleLabel(deptLabel);
+        formPanel.add(deptLabel);
         departmentComboBox = new JComboBox<>(depStrings.toArray());
+        AppTheme.styleComboBox(departmentComboBox);
         refreshDepartments();
         formPanel.add(departmentComboBox);
 
-        formPanel.add(new JLabel("Position"));
+        JLabel posLabel = new JLabel("Position");
+        AppTheme.styleLabel(posLabel);
+        formPanel.add(posLabel);
         position_Field = new JTextField() ;
+        AppTheme.styleTextField(position_Field);
         position_Field.setFont(new Font("Arial" , Font.BOLD , 15));
         formPanel.add(position_Field);
 
-        formPanel.add(new JLabel("Type"));
+        JLabel typeLabel = new JLabel("Type");
+        AppTheme.styleLabel(typeLabel);
+        formPanel.add(typeLabel);
         TypeComboBox = new JComboBox<>(typeStrings) ;
+        AppTheme.styleComboBox(TypeComboBox);
         formPanel.add(TypeComboBox);
         TypeComboBox.addActionListener(this) ;
-                l1 = new JLabel("Basic Salary") ;
-                formPanel.add(l1);
-                field1 = new JTextField() ;
-                field1.setFont(new Font("Arial" , Font.BOLD , 15));
-                formPanel.add(field1);
-                l2 = new JLabel("Bonus") ;
-                formPanel.add(l2);
-                field2 = new JTextField() ;
-                field2.setFont(new Font("Arial" , Font.BOLD , 15));
-                formPanel.add(field2);
+
+        l1 = new JLabel("Basic Salary") ;
+        AppTheme.styleLabel(l1);
+        formPanel.add(l1);
+        field1 = new JTextField() ;
+        AppTheme.styleTextField(field1);
+        field1.setFont(new Font("Arial" , Font.BOLD , 15));
+        formPanel.add(field1);
+
+        l2 = new JLabel("Bonus") ;
+        AppTheme.styleLabel(l2);
+        formPanel.add(l2);
+        field2 = new JTextField() ;
+        AppTheme.styleTextField(field2);
+        field2.setFont(new Font("Arial" , Font.BOLD , 15));
+        formPanel.add(field2);
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        AppTheme.stylePanel(buttonPanel);
         addButton = new JButton("Add");
+        AppTheme.styleButton(addButton, new Color(40, 167, 69), AppTheme.TEXT_LIGHT);
         buttonPanel.add(addButton);
         add(buttonPanel, BorderLayout.SOUTH);
         addButton.addActionListener(this);
 
         add(formPanel, BorderLayout.CENTER);
-
-
     }
 
     public void refreshDepartments()
@@ -131,10 +156,10 @@ public class AddPannel extends JPanel implements ActionListener {
             String department = (String) departmentComboBox.getSelectedItem();
             String position = position_Field.getText().trim() ;
             String Type = (String) TypeComboBox.getSelectedItem() ;
-            
+
             if (name.isEmpty() || age_field.getText().trim().isEmpty() ||
-                position.isEmpty() || field1.getText().trim().isEmpty() || 
-                field2.getText().trim().isEmpty() || department == null){
+                    position.isEmpty() || field1.getText().trim().isEmpty() ||
+                    field2.getText().trim().isEmpty() || department == null){
                 JOptionPane.showMessageDialog(this, "missed information", "Addition Failed", JOptionPane.ERROR_MESSAGE);
                 return ;
             }

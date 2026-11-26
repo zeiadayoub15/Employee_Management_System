@@ -5,7 +5,6 @@ import java.awt.*;
 
 public class MainFrame extends JFrame {
 
-    // Names of the "cards" (screens)
     public static final String HOME = "HOME";
     public static final String ADD = "ADD";
     public static final String VIEW = "VIEW";
@@ -24,11 +23,10 @@ public class MainFrame extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(AppTheme.BG_MAIN);
 
-        // ---- WEST: navigation menu ----
         add(buildMenu(), BorderLayout.WEST);
 
-        // ---- CENTER: all screens stacked, one visible at a time ----
         viewEmployeesPanel = new ViewEmployeesPanel();
         addPanel = new AddPannel(() -> viewEmployeesPanel.refreshData());
         departmentPanel = new DepartmentPanel(() -> {
@@ -36,6 +34,7 @@ public class MainFrame extends JFrame {
             viewEmployeesPanel.refreshData();
         });
 
+        contentPanel.setBackground(AppTheme.BG_MAIN);
         contentPanel.add(buildHomePanel(), HOME);
         contentPanel.add(addPanel, ADD);
         contentPanel.add(viewEmployeesPanel, VIEW);
@@ -47,15 +46,25 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel buildMenu() {
-        JPanel menu = new JPanel(new GridLayout(0, 1, 5, 5)); // any rows, 1 column
-        menu.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
-        menu.setPreferredSize(new Dimension(190, 0));
+        JPanel menu = new JPanel(new GridLayout(0, 1, 8, 8));
+        menu.setBackground(AppTheme.BG_PANEL);
+        menu.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 0, 1, AppTheme.BORDER_COLOR),
+                BorderFactory.createEmptyBorder(15, 10, 15, 10)
+        ));
+        menu.setPreferredSize(new Dimension(195, 0));
 
         JButton homeBtn = new JButton("Dashboard");
         JButton addBtn = new JButton("Add Employee");
         JButton viewBtn = new JButton("View Employees");
         JButton deptBtn = new JButton("Departments");
         JButton logoutBtn = new JButton("Log out");
+
+        AppTheme.styleButton(homeBtn, AppTheme.BTN_UPDATE, AppTheme.TEXT_LIGHT);
+        AppTheme.styleButton(addBtn, new Color(40, 167, 69), AppTheme.TEXT_LIGHT);
+        AppTheme.styleButton(viewBtn, AppTheme.BTN_SEARCH, AppTheme.TEXT_LIGHT);
+        AppTheme.styleButton(deptBtn, AppTheme.BTN_RESET, AppTheme.TEXT_DARK);
+        AppTheme.styleButton(logoutBtn, AppTheme.BTN_DELETE, AppTheme.TEXT_LIGHT);
 
         homeBtn.addActionListener(e -> showCard(HOME));
         addBtn.addActionListener(e -> showCard(ADD));
@@ -72,17 +81,21 @@ public class MainFrame extends JFrame {
     }
 
     private JPanel buildHomePanel() {
-        JPanel p = new JPanel(new GridBagLayout()); // centers its content
+        JPanel p = new JPanel(new GridBagLayout());
+        p.setBackground(AppTheme.BG_MAIN);
         JLabel welcome = new JLabel("Welcome, Admin!");
         welcome.setFont(new Font("Arial", Font.BOLD, 28));
+        welcome.setForeground(AppTheme.TEXT_DARK);
         p.add(welcome);
         return p;
     }
 
-    // Temporary screen until the real panel is ready
     private JPanel placeholder(String text) {
         JPanel p = new JPanel(new GridBagLayout());
-        p.add(new JLabel(text));
+        p.setBackground(AppTheme.BG_MAIN);
+        JLabel label = new JLabel(text);
+        AppTheme.styleLabel(label);
+        p.add(label);
         return p;
     }
 
@@ -106,4 +119,3 @@ public class MainFrame extends JFrame {
         }
     }
 }
-
