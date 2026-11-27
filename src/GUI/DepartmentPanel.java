@@ -91,13 +91,11 @@ public class DepartmentPanel extends JPanel implements ActionListener {
         AppTheme.stylePanel(centerWrapper);
         centerWrapper.add(formPanel);
 
-        // الفورم + زرار Add فوق بعض
         JPanel topPanel = new JPanel(new BorderLayout(0, 5));
         AppTheme.stylePanel(topPanel);
         topPanel.add(centerWrapper, BorderLayout.CENTER);
         topPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        // جدول الأقسام
         tableModel = new DefaultTableModel(new String[]{"ID", "Department name"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
