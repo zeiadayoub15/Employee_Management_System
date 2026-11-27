@@ -343,7 +343,12 @@ public class ViewEmployeesPanel extends JPanel
                 updatedEmployee = new PartTimeEmployee(currentEmp.getId(), newName, newAge, newDept, newPosition, val1, val2);
             }
 
-            SharedData.getEmployees().set(targetIndex, updatedEmployee);
+            try {
+                SharedData.employees().updateEmployee(currentEmp.getId(), updatedEmployee);
+            } catch (IllegalArgumentException | java.io.IOException ex) {
+                JOptionPane.showMessageDialog(dialog, ex.getMessage(), "Update Failed", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             handleFilterByDepartment();
             dialog.dispose();
 
@@ -397,7 +402,12 @@ public class ViewEmployeesPanel extends JPanel
         );
 
         if (confirm == JOptionPane.YES_OPTION) {
-            SharedData.getEmployees().removeIf(emp -> emp.getId() == empId);
+            try {
+                SharedData.employees().deleteEmployee(empId);
+                } catch (IllegalArgumentException | java.io.IOException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Delete Failed", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
             tableModel.removeRow(selectedRow);
             JOptionPane.showMessageDialog(
                     this,

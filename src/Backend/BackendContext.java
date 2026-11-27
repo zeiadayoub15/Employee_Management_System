@@ -23,7 +23,7 @@ public class BackendContext {
         departments.addAll(snapshot.getDepartments());
         if (departments.isEmpty()) seedDefaultDepartments();
         this.employeeManager = new EmployeeManager(departments, handler, employees);
-        this.departmentManager = new DepartmentManager(employees, handler);
+        this.departmentManager = new DepartmentManager(employees, handler, departments);
         employeeManager.loadEmployees(employees);
         departmentManager.loadDepartments(departments);
         // Persist seeded departments so first launch is deterministic.

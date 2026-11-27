@@ -8,14 +8,21 @@ import java.util.List;
 
 /** Business logic for department CRUD and referential integrity. */
 public class DepartmentManager {
-    private final List<Department> departments = new ArrayList<Department>();
+    private final List<Department> departments;
     private final List<Employee> employees;
     private final FileHandler fileHandler;
 
     public DepartmentManager(List<Employee> employees, FileHandler fileHandler) {
-        if (employees == null || fileHandler == null) throw new IllegalArgumentException("Employees and FileHandler are required.");
+        this(employees, fileHandler, new ArrayList<Department>());
+    }
+
+    /** Uses a department list shared with EmployeeManager so both always see the same departments. */
+    public DepartmentManager(List<Employee> employees, FileHandler fileHandler, List<Department> sharedDepartments) {
+        if (employees == null || fileHandler == null || sharedDepartments == null)
+            throw new IllegalArgumentException("Employees, FileHandler and departments are required.");
         this.employees = employees;
         this.fileHandler = fileHandler;
+        this.departments = sharedDepartments;
     }
     public synchronized void loadDepartments(List<Department> loaded) {
         List<Department> source = loaded == departments ? new ArrayList<Department>(loaded) : loaded;
