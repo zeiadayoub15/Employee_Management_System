@@ -110,13 +110,12 @@ public class DepartmentPanel extends JPanel implements ActionListener {
                     JOptionPane.showMessageDialog(this, "ID must be positive!", "Addition Failed", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-                if (SharedData.findDepartmentById(ID) != null || SharedData.findDepartmentByName(deptName) != null) {
-                    JOptionPane.showMessageDialog(this, "Department ID or Name already exists!", "Addition Failed", JOptionPane.ERROR_MESSAGE);
+                try {
+                    SharedData.departments().addDepartment(new Department(ID, deptName));
+                } catch (IllegalArgumentException | java.io.IOException ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Addition Failed", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
-
-                Department newDept = new Department(ID, deptName);
-                SharedData.addDepartment(newDept);
                 if (onDepartmentAdded != null) {
                     onDepartmentAdded.run();
                 }

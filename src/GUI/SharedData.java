@@ -1,90 +1,52 @@
 package GUI;
 
-import Entities.*;
-import java.util.ArrayList;
+import Backend.BackendContext;
+import Backend.DepartmentManager;
+import Backend.EmployeeManager;
+import Entities.Department;
+import Entities.Employee;
+
+import java.io.IOException;
 import java.util.List;
 
+/** Single access point to the backend. One BackendContext for the whole app session. */
 public class SharedData {
 
-    private static final List<Employee> employees = new ArrayList<>();
-    private static final List<Department> departments = new ArrayList<>();
-    private static int nextEmployeeId = 105;
+    private static BackendContext backend;
 
-    static {
-        departments.add(new Department(1, "IT"));
-        departments.add(new Department(2, "Human Resources"));
-        departments.add(new Department(3, "Finance"));
-        departments.add(new Department(4, "Marketing"));
-        departments.add(new Department(5, "Sales"));
-
-        employees.add(new FullTimeEmployee(
-                101, "Ahmed Hassan", 28, "IT", "Software Engineer", 15000.0, 2000.0
-        ));
-        employees.add(new PartTimeEmployee(
-                102, "Mona Adel", 24, "Marketing", "Content Specialist", 100.0, 80.0
-        ));
-        employees.add(new FullTimeEmployee(
-                103, "Karim Samir", 32, "Finance", "Accountant", 18000.0, 1500.0
-        ));
-        employees.add(new PartTimeEmployee(
-                104, "Nourhan Tarek", 26, "Human Resources", "Recruiter", 120.0, 60.0
-        ));
+    /** Call once at startup, before opening any window. */
+    public static void init() throws IOException {
+        if (backend == null) {
+            backend = new BackendContext();
+        }
     }
 
+    public static EmployeeManager employees() {
+        return backend.getEmployeeManager();
+    }
+
+    public static DepartmentManager departments() {
+        return backend.getDepartmentManager();
+    }
+
+    // Read-only helpers (they return COPIES, so never modify these lists directly)
     public static List<Employee> getEmployees() {
-        return employees;
+        return employees().getAllEmployees();
     }
 
     public static List<Department> getDepartments() {
-        return departments;
-    }
-
-    public static int generateNextEmployeeId() {
-        while (findEmployeeById(nextEmployeeId) != null) {
-            nextEmployeeId++;
-        }
-        return nextEmployeeId++;
+        return departments().getAllDepartments();
     }
 
     public static Employee findEmployeeById(int id) {
-        for (Employee emp : employees) {
-            if (emp.getId() == id) {
-                return emp;
-            }
-        }
-        return null;
+        return employees().findEmployeeById(id);
     }
 
     public static Department findDepartmentById(int id) {
-        for (Department dept : departments) {
-            if (dept.getId() == id) {
-                return dept;
-            }
-        }
-        return null;
+        return departments().findDepartmentById(id);
     }
 
     public static Department findDepartmentByName(String name) {
-        if (name == null) {
-            return null;
-        }
-        for (Department dept : departments) {
-            if (dept.getName() != null && dept.getName().equalsIgnoreCase(name.trim())) {
-                return dept;
-            }
-        }
-        return null;
-    }
-
-    public static void addEmployee(Employee emp) {
-        if (emp != null) {
-            employees.add(emp);
-        }
-    }
-
-    public static void addDepartment(Department dept) {
-        if (dept != null && Helpers.isValidDepartment(dept)) {
-            departments.add(dept);
-        }
+        return departments().findDepartmentByName(name);
     }
 }

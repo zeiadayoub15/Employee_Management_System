@@ -180,14 +180,20 @@ public class AddPannel extends JPanel implements ActionListener {
                 if (age <= 0 || F1 < 0 || F2 < 0) {
                     JOptionPane.showMessageDialog(this, "invalid numeric values", "Addition Failed", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    int newId = SharedData.generateNextEmployeeId();
-                    Employee newEmp;
-                    if (Type.equals("Full time")) {
-                        newEmp = new FullTimeEmployee(newId, name, age, department, position, F1, F2);
-                    } else {
-                        newEmp = new PartTimeEmployee(newId, name, age, department, position, F1, F2);
+                    try {
+                        int newId = SharedData.employees().generateNextEmployeeId();
+                        Employee newEmp;
+                        if (Type.equals("Full time")) {
+                            newEmp = new FullTimeEmployee(newId, name, age, department, position, F1, F2);
+                        } else {
+                            newEmp = new PartTimeEmployee(newId, name, age, department, position, F1, F2);
+                        }
+                        SharedData.employees().addEmployee(newEmp);   // يتحقق ويحفظ في الملف
+                    } catch (IllegalArgumentException | java.io.IOException ex) {
+                        JOptionPane.showMessageDialog(this, ex.getMessage(), "Addition Failed", JOptionPane.ERROR_MESSAGE);
+                        return;                                        // مايكملش ويطلع "added successfully"
                     }
-                    SharedData.addEmployee(newEmp);
+
                     if (onEmployeeAdded != null) {
                         onEmployeeAdded.run();
                     }
@@ -199,7 +205,9 @@ public class AddPannel extends JPanel implements ActionListener {
                     field1.setText("");
                     field2.setText("");
                 }
-            } catch (NumberFormatException ex) {
+
+                }
+             catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(this, "Age and salary fields must be numbers!", "Addition Failed", JOptionPane.ERROR_MESSAGE);
             }
         }
