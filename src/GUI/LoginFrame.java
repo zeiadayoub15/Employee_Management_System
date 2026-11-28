@@ -18,24 +18,21 @@ public class LoginFrame extends JFrame implements ActionListener {
         this.setSize(591, 246);
         this.setResizable(false);
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setLocationRelativeTo(null);
+        this.setLocationRelativeTo(null);       // to make frame at center
         this.setLayout(new BorderLayout());
-        this.getContentPane().setBackground(AppTheme.BG_MAIN);
 
         JLabel title = new JLabel("LOGIN", JLabel.CENTER);
         title.setFont(new Font("Arial", Font.BOLD, 28));
-        title.setForeground(AppTheme.TEXT_DARK);
         title.setBorder(BorderFactory.createEmptyBorder(20, 0, 10, 0));
         this.add(title, BorderLayout.NORTH);
 
-        JPanel form = new JPanel(new GridLayout(2, 2, 10, 15));
+        JPanel form = new JPanel(new GridLayout(2, 2, 10, 15));  //rows , col , hgab , vgab
         form.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
-        AppTheme.stylePanel(form);
+        form.setBackground(Color.WHITE);
 
         JLabel userLabel = new JLabel("Username:");
         AppTheme.styleLabel(userLabel);
         Username_field = new JTextField() ;
-        AppTheme.styleTextField(Username_field);
         Username_field.setFont(new Font(null , Font.BOLD , 15));
         form.add(userLabel);
         form.add(Username_field);
@@ -43,13 +40,6 @@ public class LoginFrame extends JFrame implements ActionListener {
         JLabel passLabel = new JLabel("Password:");
         AppTheme.styleLabel(passLabel);
         pass_field = new JPasswordField() ;
-        pass_field.setFont(AppTheme.FONT_INPUT);
-        pass_field.setBackground(Color.WHITE);
-        pass_field.setForeground(AppTheme.TEXT_DARK);
-        pass_field.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(AppTheme.BORDER_COLOR, 1),
-                BorderFactory.createEmptyBorder(4, 6, 4, 6)
-        ));
         form.add(passLabel);
         form.add(pass_field);
         this.add(form, BorderLayout.CENTER);
