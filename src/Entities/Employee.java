@@ -1,7 +1,8 @@
 package Entities;
 import java.io.Serializable; // bn7wel el object L bytes 3shan a5zen el file 3shan el data mtde3s
 
-public abstract class Employee implements Serializable {
+public abstract class Employee implements Serializable
+{
 
     private int id;
     private String name;
@@ -9,7 +10,8 @@ public abstract class Employee implements Serializable {
     private String department;
     private String position;
 
-    public Employee(int id, String name, int age, String department, String position) {
+    public Employee(int id, String name, int age, String department, String position)
+    {
         setId(id);
         setName(name);
         setAge(age);

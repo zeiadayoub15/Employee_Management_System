@@ -2,12 +2,13 @@ package Entities;
 
 import java.io.Serializable;// interface save file
 
-public class Department implements Serializable {
-
+public class Department implements Serializable
+{
     private int id;
     private String name;
 
-    public Department(int id, String name) {
+    public Department(int id, String name)
+    {
         setId(id);
         setName(name);
     }

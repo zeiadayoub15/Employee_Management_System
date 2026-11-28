@@ -5,8 +5,8 @@ public class FullTimeEmployee extends Employee {
     private double basicSalary;
     private double bonus;
 
-    public FullTimeEmployee(int id, String name, int age, String department,
-                            String position, double basicSalary, double bonus) {
+    public FullTimeEmployee(int id, String name, int age, String department, String position, double basicSalary, double bonus)
+    {
         super(id, name, age, department, position);
         setBasicSalary(basicSalary);
         setBonus(bonus);
@@ -27,7 +27,8 @@ public class FullTimeEmployee extends Employee {
         return basicSalary;
     }
 
-    public void setBasicSalary(double basicSalary) {
+    public void setBasicSalary(double basicSalary)
+    {
         if (Helpers.isNonNegativeDouble(basicSalary)) {
             this.basicSalary = basicSalary;
         }
